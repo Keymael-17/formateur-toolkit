@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#151d23">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Formation">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Boîte à outils formation — Patrick Paumard</title>
+<style>
+  :root {
+    --fichet-cyan: #0bbbef;
+    --fichet-dark: #151d23;
+    --fichet-dark-2: #1f2a33;
+    --fichet-cyan-dim: rgba(11, 187, 239, 0.15);
+    --text: #e8eef2;
+    --text-muted: #8a96a3;
+    --border: rgba(255, 255, 255, 0.08);
+    --danger: #ff5a4e;
+    --success: #2ecc71;
+    --warning: #f5a623;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--fichet-dark);
+    color: var(--text);
+    font-family: Arial, -apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    overscroll-behavior: none;
+  }
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  header {
+    background: var(--fichet-dark-2);
+    padding: 14px 16px 12px;
+    border-bottom: 2px solid var(--fichet-cyan);
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 {
+    margin: 0; font-size: 16px; font-weight: bold;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--fichet-cyan);
+  }
+  header .subtitle {
+    font-size: 11px; color: var(--text-muted);
+    margin-top: 2px; letter-spacing: 0.03em;
+  }
+  nav.tabs {
+    display: flex; gap: 4px;
+    background: var(--fichet-dark-2);
+    padding: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: sticky; top: 56px; z-index: 9;
+    border-bottom: 1px solid var(--border);
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex: 1; min-width: 56px;
+    padding: 10px 6px;
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 22px;
+    transition: all 0.15s;
+  }
+  .tab-btn .label {
+    display: block; font-size: 9px;
+    margin-top: 2px; letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .tab-btn.active {
+    background: var(--fichet-cyan-dim);
+    color: var(--fichet-cyan);
+    border-color: var(--fichet-cyan);
+  }
+  main { padding: 16px; }
+  section.tool { display: none; }
+  section.tool.active { display: block; }
+  h2 {
+    font-size: 14px; font-weight: bold;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--fichet-cyan);
+    margin: 0 0 16px;
+  }
+  .big-display {
+    font-family: "Courier New", monospace;
+    font-size: 56px; font-weight: bold;
+    text-align: center;
+    margin: 24px 0;
+    letter-spacing: 0.04em;
+    color: var(--text);
+  }
+  .big-display.danger { color: var(--danger); animation: pulse 0.6s infinite; }
+  @keyframes pulse { 50% { opacity: 0.4; } }
+  .btn-row {
+    display: flex; gap: 8px;
+    margin: 16px 0;
+  }
+  .btn-row button { flex: 1; }
+  button {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--fichet-cyan);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    transition: all 0.15s;
+    -webkit-appearance: none;
+  }
+  button:active { transform: scale(0.97); background: var(--fichet-cyan-dim); }
+  button.primary { background: var(--fichet-cyan); color: var(--fichet-dark); }
+  button.primary:active { background: #09a5d3; }
+  button.danger { border-color: var(--danger); color: var(--danger); }
+  input[type="number"], input[type="text"], textarea {
+    width: 100%;
+    background: var(--fichet-dark-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    -webkit-appearance: none;
+  }
+  input[type="number"] { width: 80px; text-align: center; }
+  input:focus, textarea:focus { outline: none; border-color: var(--fichet-cyan); }
+  textarea { resize: vertical; min-height: 100px; }
+  .label {
+    font-size: 11px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    margin-bottom: 6px; display: block;
+  }
+  .input-row {
+    display: flex; gap: 10px; align-items: center;
+    margin: 12px 0;
+    justify-content: center;
+  }
+  .input-row .label { margin: 0; }
+  .result-card {
+    background: var(--fichet-dark-2);
+    border-left: 3px solid var(--fichet-cyan);
+    border-radius: 4px;
+    padding: 12px 14px;
+    margin: 10px 0;
+  }
+  .result-card .label { margin-bottom: 4px; }
+  .pick-name {
+    font-size: 26px; font-weight: bold;
+    text-align: center;
+    color: var(--fichet-cyan);
+    padding: 8px 0;
+  }
+  /* Présence */
+  .presence-stats {
+    display: flex; gap: 12px;
+    margin: 12px 0 16px;
+  }
+  .stat-card {
+    flex: 1;
+    background: var(--fichet-dark-2);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-card .num {
+    font-size: 24px; font-weight: bold;
+    color: var(--fichet-cyan);
+  }
+  .stat-card .lbl {
+    font-size: 10px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+  .presence-row {
+    display: flex; align-items: center;
+    background: var(--fichet-dark-2);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin: 6px 0;
+    border-left: 3px solid var(--text-muted);
+  }
+  .presence-row.present { border-left-color: var(--success); }
+  .presence-row.absent { border-left-color: var(--danger); }
+  .presence-row .name { flex: 1; font-size: 14px; }
+  .presence-row .status-btn {
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 11px;
+    background: transparent;
+    color: var(--text-muted);
+    min-width: 80px;
+  }
+  .presence-row.present .status-btn {
+    background: var(--success); color: var(--fichet-dark); border-color: var(--success);
+  }
+  .presence-row.absent .status-btn {
+    background: var(--danger); color: white; border-color: var(--danger);
+  }
+  .empty-hint {
+    color: var(--text-muted);
+    font-size: 13px;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+  }
+  footer {
+    text-align: center;
+    padding: 24px 16px;
+    color: var(--text-muted);
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-top: 1px solid var(--border);
+    margin-top: 24px;
+  }
+  .footer-name { color: var(--fichet-cyan); font-weight: bold; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Boîte à outils formation</h1>
+  <div class="subtitle">Patrick Paumard · Formateur</div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab-btn active" data-tab="chrono" aria-label="Chronomètre">⏱<span class="label">Chrono</span></button>
+  <button class="tab-btn" data-tab="timer" aria-label="Minuteur">⏳<span class="label">Minuteur</span></button>
+  <button class="tab-btn" data-tab="draw" aria-label="Tirage">🎲<span class="label">Tirage</span></button>
+  <button class="tab-btn" data-tab="groups" aria-label="Groupes">👥<span class="label">Groupes</span></button>
+  <button class="tab-btn" data-tab="presence" aria-label="Présence">✓<span class="label">Présence</span></button>
+  <button class="tab-btn" data-tab="notes" aria-label="Notes">📝<span class="label">Notes</span></button>
+</nav>
+
+<main>
+
+  <section class="tool active" data-section="chrono">
+    <h2>Chronomètre</h2>
+    <div class="big-display" id="chrono-display">00:00.0</div>
+    <div class="btn-row">
+      <button class="primary" id="chrono-start">Démarrer</button>
+      <button id="chrono-reset">Reset</button>
+    </div>
+  </section>
+
+  <section class="tool" data-section="timer">
+    <h2>Minuteur</h2>
+    <div class="big-display" id="timer-display">05:00</div>
+    <div class="input-row">
+      <span class="label">Minutes</span>
+      <input type="number" id="timer-input" value="5" min="1" max="180">
+      <button id="timer-set">Régler</button>
+    </div>
+    <div class="btn-row">
+      <button class="primary" id="timer-start">Démarrer</button>
+      <button id="timer-reset">Reset</button>
+    </div>
+  </section>
+
+  <section class="tool" data-section="draw">
+    <h2>Tirage au sort</h2>
+    <label class="label">Stagiaires (un nom par ligne)</label>
+    <textarea id="draw-names" rows="6" placeholder="Marie&#10;Jean&#10;Sophie"></textarea>
+    <div class="btn-row">
+      <button class="primary" id="draw-pick">Piocher un nom</button>
+    </div>
+    <div class="result-card" id="draw-result" style="display:none;">
+      <div class="label">Stagiaire désigné</div>
+      <div class="pick-name" id="draw-name">—</div>
+    </div>
+  </section>
+
+  <section class="tool" data-section="groups">
+    <h2>Formation de groupes</h2>
+    <label class="label">Stagiaires (un nom par ligne)</label>
+    <textarea id="groups-names" rows="5" placeholder="Marie&#10;Jean"></textarea>
+    <div class="input-row">
+      <span class="label">Nombre de groupes</span>
+      <input type="number" id="groups-count" value="3" min="2" max="20">
+    </div>
+    <div class="btn-row">
+      <button class="primary" id="groups-make">Constituer les groupes</button>
+    </div>
+    <div id="groups-result"></div>
+  </section>
+
+  <section class="tool" data-section="presence">
+    <h2>Présence stagiaires</h2>
+    <label class="label">Liste des stagiaires (un par ligne)</label>
+    <textarea id="presence-input" rows="4" placeholder="Marie&#10;Jean&#10;Sophie"></textarea>
+    <div class="btn-row">
+      <button class="primary" id="presence-load">Charger la liste</button>
+    </div>
+    <div class="presence-stats" id="presence-stats" style="display:none;">
+      <div class="stat-card"><div class="num" id="stat-present">0</div><div class="lbl">Présents</div></div>
+      <div class="stat-card"><div class="num" id="stat-absent">0</div><div class="lbl">Absents</div></div>
+      <div class="stat-card"><div class="num" id="stat-total">0</div><div class="lbl">Total</div></div>
+    </div>
+    <div class="btn-row" id="presence-actions" style="display:none;">
+      <button id="presence-all-present">Tous présents</button>
+      <button id="presence-reset">Reset statuts</button>
+    </div>
+    <div id="presence-list"></div>
+  </section>
+
+  <section class="tool" data-section="notes">
+    <h2>Notes de session</h2>
+    <textarea id="notes-area" rows="12" placeholder="Observations, points à reprendre, questions du groupe..."></textarea>
+    <div class="btn-row">
+      <button id="notes-copy">Copier</button>
+      <button class="danger" id="notes-clear">Effacer</button>
+    </div>
+    <div class="label" id="notes-saved" style="text-align:center; margin-top:8px;">Sauvegarde automatique activée</div>
+  </section>
+
+</main>
+
+<footer>
+  Boîte à outils formation · <span class="footer-name">Patrick Paumard</span> · v1.0
+</footer>
+
+<script>
+// ============ STORAGE HELPERS ============
+const LS = {
+  get: (k, def='') => { try { return localStorage.getItem('formateur:' + k) ?? def; } catch(e) { return def; } },
+  set: (k, v) => { try { localStorage.setItem('formateur:' + k, v); } catch(e) {} },
+};
+
+// ============ TAB NAVIGATION ============
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const t = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tool').forEach(s => s.classList.toggle('active', s.dataset.section === t));
+    LS.set('last-tab', t);
+    window.scrollTo(0, 0);
+  });
+});
+
+// Restore last tab
+const lastTab = LS.get('last-tab', 'chrono');
+const btnToActivate = document.querySelector(`.tab-btn[data-tab="${lastTab}"]`);
+if (btnToActivate) btnToActivate.click();
+
+// ============ CHRONO ============
+let chronoInterval = null, chronoStart = 0, chronoElapsed = 0;
+const chronoDisplay = document.getElementById('chrono-display');
+const chronoBtn = document.getElementById('chrono-start');
+const chronoFormat = ms => {
+  const total = Math.floor(ms / 100);
+  const m = Math.floor(total / 600), s = Math.floor((total % 600) / 10);
+  return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '.' + (total % 10);
+};
+chronoBtn.addEventListener('click', () => {
+  if (chronoInterval) {
+    clearInterval(chronoInterval); chronoInterval = null;
+    chronoElapsed += Date.now() - chronoStart;
+    chronoBtn.textContent = 'Reprendre';
+  } else {
+    chronoStart = Date.now();
+    chronoInterval = setInterval(() => chronoDisplay.textContent = chronoFormat(chronoElapsed + Date.now() - chronoStart), 100);
+    chronoBtn.textContent = 'Pause';
+  }
+});
+document.getElementById('chrono-reset').addEventListener('click', () => {
+  if (chronoInterval) clearInterval(chronoInterval);
+  chronoInterval = null; chronoElapsed = 0;
+  chronoDisplay.textContent = '00:00.0';
+  chronoBtn.textContent = 'Démarrer';
+});
+
+// ============ TIMER ============
+let timerInterval = null, timerRemaining = 300;
+const timerDisplay = document.getElementById('timer-display');
+const timerBtn = document.getElementById('timer-start');
+const timerFormat = s => String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+const playBeep = () => {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, 200, 400].forEach(delay => setTimeout(() => {
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.frequency.value = 880; o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.3, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      o.start(); o.stop(ctx.currentTime + 0.15);
+    }, delay));
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+  } catch(e){}
+};
+document.getElementById('timer-set').addEventListener('click', () => {
+  const v = parseInt(document.getElementById('timer-input').value, 10) || 5;
+  timerRemaining = v * 60;
+  timerDisplay.textContent = timerFormat(timerRemaining);
+  timerDisplay.classList.remove('danger');
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; timerBtn.textContent = 'Démarrer'; }
+});
+timerBtn.addEventListener('click', () => {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; timerBtn.textContent = 'Reprendre'; }
+  else {
+    timerInterval = setInterval(() => {
+      timerRemaining -= 1;
+      timerDisplay.textContent = timerFormat(Math.max(0, timerRemaining));
+      if (timerRemaining <= 0) {
+        clearInterval(timerInterval); timerInterval = null;
+        timerDisplay.classList.add('danger');
+        timerBtn.textContent = 'Terminé';
+        playBeep();
+      }
+    }, 1000);
+    timerBtn.textContent = 'Pause';
+    timerDisplay.classList.remove('danger');
+  }
+});
+document.getElementById('timer-reset').addEventListener('click', () => {
+  if (timerInterval) clearInterval(timerInterval); timerInterval = null;
+  const v = parseInt(document.getElementById('timer-input').value, 10) || 5;
+  timerRemaining = v * 60;
+  timerDisplay.textContent = timerFormat(timerRemaining);
+  timerDisplay.classList.remove('danger');
+  timerBtn.textContent = 'Démarrer';
+});
+
+// ============ DRAW ============
+const drawNames = document.getElementById('draw-names');
+drawNames.value = LS.get('draw-names');
+drawNames.addEventListener('input', () => LS.set('draw-names', drawNames.value));
+document.getElementById('draw-pick').addEventListener('click', () => {
+  const names = drawNames.value.split('\n').map(s => s.trim()).filter(Boolean);
+  if (names.length === 0) return;
+  const nameEl = document.getElementById('draw-name');
+  document.getElementById('draw-result').style.display = '';
+  // Petit effet de défilement
+  let i = 0;
+  const spin = setInterval(() => {
+    nameEl.textContent = names[Math.floor(Math.random() * names.length)];
+    if (++i > 8) {
+      clearInterval(spin);
+      nameEl.textContent = names[Math.floor(Math.random() * names.length)];
+      if (navigator.vibrate) navigator.vibrate(50);
+    }
+  }, 80);
+});
+
+// ============ GROUPS ============
+const groupsNames = document.getElementById('groups-names');
+groupsNames.value = LS.get('groups-names');
+groupsNames.addEventListener('input', () => LS.set('groups-names', groupsNames.value));
+const groupsCount = document.getElementById('groups-count');
+groupsCount.value = LS.get('groups-count', '3');
+groupsCount.addEventListener('input', () => LS.set('groups-count', groupsCount.value));
+document.getElementById('groups-make').addEventListener('click', () => {
+  const names = groupsNames.value.split('\n').map(s => s.trim()).filter(Boolean);
+  const n = parseInt(groupsCount.value, 10) || 2;
+  if (names.length === 0) return;
+  const shuffled = [...names].sort(() => Math.random() - 0.5);
+  const groups = Array.from({length: n}, () => []);
+  shuffled.forEach((name, i) => groups[i % n].push(name));
+  document.getElementById('groups-result').innerHTML = groups
+    .map((g, i) => `<div class="result-card"><div class="label">Groupe ${i+1} (${g.length})</div><div>${g.map(escapeHtml).join(' · ')}</div></div>`)
+    .join('');
+});
+
+// ============ PRESENCE ============
+const presenceInput = document.getElementById('presence-input');
+let presenceData = JSON.parse(LS.get('presence-data', '[]'));
+const renderPresence = () => {
+  const list = document.getElementById('presence-list');
+  if (presenceData.length === 0) {
+    list.innerHTML = '<div class="empty-hint">Charge une liste de stagiaires ci-dessus.</div>';
+    document.getElementById('presence-stats').style.display = 'none';
+    document.getElementById('presence-actions').style.display = 'none';
+    return;
+  }
+  document.getElementById('presence-stats').style.display = '';
+  document.getElementById('presence-actions').style.display = '';
+  const present = presenceData.filter(p => p.status === 'present').length;
+  const absent = presenceData.filter(p => p.status === 'absent').length;
+  document.getElementById('stat-present').textContent = present;
+  document.getElementById('stat-absent').textContent = absent;
+  document.getElementById('stat-total').textContent = presenceData.length;
+  list.innerHTML = presenceData.map((p, i) => {
+    const cls = p.status ? p.status : '';
+    const lbl = p.status === 'present' ? 'Présent' : p.status === 'absent' ? 'Absent' : 'Non noté';
+    return `<div class="presence-row ${cls}"><div class="name">${escapeHtml(p.name)}</div><button class="status-btn" data-i="${i}">${lbl}</button></div>`;
+  }).join('');
+  list.querySelectorAll('.status-btn').forEach(b => b.addEventListener('click', () => {
+    const i = parseInt(b.dataset.i, 10);
+    const cur = presenceData[i].status;
+    presenceData[i].status = cur === 'present' ? 'absent' : cur === 'absent' ? null : 'present';
+    LS.set('presence-data', JSON.stringify(presenceData));
+    renderPresence();
+  }));
+};
+document.getElementById('presence-load').addEventListener('click', () => {
+  const names = presenceInput.value.split('\n').map(s => s.trim()).filter(Boolean);
+  if (names.length === 0) return;
+  // Conserve les statuts existants si même nom
+  presenceData = names.map(n => {
+    const existing = presenceData.find(p => p.name === n);
+    return existing || { name: n, status: null };
+  });
+  LS.set('presence-data', JSON.stringify(presenceData));
+  LS.set('presence-input', presenceInput.value);
+  renderPresence();
+});
+document.getElementById('presence-all-present').addEventListener('click', () => {
+  presenceData.forEach(p => p.status = 'present');
+  LS.set('presence-data', JSON.stringify(presenceData));
+  renderPresence();
+});
+document.getElementById('presence-reset').addEventListener('click', () => {
+  if (!confirm('Effacer tous les statuts ?')) return;
+  presenceData.forEach(p => p.status = null);
+  LS.set('presence-data', JSON.stringify(presenceData));
+  renderPresence();
+});
+presenceInput.value = LS.get('presence-input');
+renderPresence();
+
+// ============ NOTES ============
+const notesArea = document.getElementById('notes-area');
+const notesSaved = document.getElementById('notes-saved');
+notesArea.value = LS.get('notes');
+let savedTimer;
+notesArea.addEventListener('input', () => {
+  LS.set('notes', notesArea.value);
+  clearTimeout(savedTimer);
+  notesSaved.textContent = 'Enregistré';
+  savedTimer = setTimeout(() => notesSaved.textContent = 'Sauvegarde automatique activée', 1500);
+});
+document.getElementById('notes-copy').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(notesArea.value);
+    notesSaved.textContent = 'Copié dans le presse-papier';
+    setTimeout(() => notesSaved.textContent = 'Sauvegarde automatique activée', 2000);
+  } catch(e) {
+    notesArea.select();
+    document.execCommand('copy');
+  }
+});
+document.getElementById('notes-clear').addEventListener('click', () => {
+  if (confirm('Effacer toutes les notes ?')) {
+    notesArea.value = '';
+    LS.set('notes', '');
+  }
+});
+
+// ============ HELPERS ============
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ============ SERVICE WORKER ============
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
